@@ -401,20 +401,23 @@ function create_email_template(string $content, string $title = 'InnovEd 2026'):
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="color-scheme" content="dark">
+    <meta name="supported-color-schemes" content="dark">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>$title</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800&display=swap');
+        :root { color-scheme: dark; }
     </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #111533; font-family: 'DM Sans', sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #111533; font-family: 'Poppins', sans-serif;">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
             <td style="padding: 20px 10px;">
                 <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; border-collapse: collapse; background-color: #1c2554; border-radius: 16px; border: 1px solid #25326f; overflow: hidden;">
                     <tr>
                         <td align="center" style="padding: 30px 20px; border-bottom: 1px solid #25326f;">
-                            <h1 style="margin: 0; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: #f0f8ff; letter-spacing: -0.5px;">Innov<span style="color: #ffc107;">Ed</span> 2026</h1><h2 style="margin: 10px 0 0; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 16px; color: rgba(240, 248, 255, 0.8); letter-spacing: 0px;">Transforming the Education Landscape through EdTech and AI</h2>
+                            <h1 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 28px; color: #f0f8ff; letter-spacing: -0.5px;">Innov<span style="color: #ffc107;">ED</span> 2026</h1><h2 style="margin: 10px 0 0; font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 16px; color: rgb(255, 255, 255); letter-spacing: 0px;">Transforming the Education Landscape through EdTech and AI</h2>
                         </td>
                     </tr>
                     <tr><td style="padding: 35px 30px; color: #f0f8ff; font-size: 16px; line-height: 1.6;">$content</td></tr>
@@ -479,16 +482,17 @@ function send_qr_code_email(array $attendee, array $event): bool|string
         }
 
         $content_html = "
+            <h2 style='text-align: center; color: #ffc107; font-size: 24px; font-weight: bold; margin-top: 5px; margin-bottom: 20px;'>Your Registration is Approved!</h2>
             <p style='margin-top:0;'>Hi " . htmlspecialchars($attendee['full_name']) . ",</p>
-            <p>Thank you for registering for <strong>" . htmlspecialchars($event_name) . "</strong>.</p>
+            <p>We are pleased to inform you that your registration for the INNOVED 2026 has been officially approved. We are excited to have you join us.</p>
             <div style='padding: 15px; background-color: rgba(255,255,255,0.05); border-radius: 10px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1);'>
                 <h3 style='margin-top:0; margin-bottom: 12px; color: #ffc107;'>Event Details:</h3>
                 <p style='margin: 5px 0;'><strong>Date & Time:</strong> " . ($event_datetime_str ?: 'To be announced') . "</p>
                 <p style='margin: 5px 0;'><strong>Venue:</strong> " . (htmlspecialchars($event['venue'] ?? 'To be announced')) . "</p>
                 <p style='margin: 5px 0;'><strong>QR Code ID:</strong> " . (htmlspecialchars($attendee['qr_code_id'] ?? 'N/A')) . "</p>
             </div>
-            <p style='font-size: 14px; color: rgba(240, 248, 255, 0.7); border-left: 3px solid #ffc107; padding-left: 15px; margin-top: 20px;'>
-                Your QR code is attached to this email as <strong>qr.png</strong>. Please present it upon entry.
+            <p style='font-size: 16px; color: #f0f8ff; border-left: 3px solid #ffc107; padding-left: 15px; margin-top: 20px;'>
+                Kindly keep this email, or download or take a screenshot of the attached QR code, which will be required for attendance verification and event entry.
             </p>
             <p>We look forward to seeing you there!</p>
             <p style='margin-bottom:0;'>Regards,<br>The Event Committee</p>
@@ -497,12 +501,12 @@ function send_qr_code_email(array $attendee, array $event): bool|string
         // Create a plain-text version of the email (AltBody). This is crucial for deliverability.
         $body_plain = "
 Hi " . $attendee['full_name'] . ",\n\n" .
-"Thank you for registering for " . $event_name . ".\n\n" .
+"We are pleased to inform you that your registration for the INNOVED 2026 has been officially approved. We are excited to have you join us.\n\n" .
 "Event Details:\n" .
 "Date & Time: " . ($event_datetime_str ?: 'To be announced') . "\n" .
 "Venue: " . ($event['venue'] ?? 'To be announced') . "\n" .
 "QR Code ID: " . ($attendee['qr_code_id'] ?? 'N/A') . "\n\n" .
-"Your QR code is attached to this email as 'qr.png'. Please present it upon entry.\n\n" .
+"Kindly keep this email, or download or take a screenshot of the attached QR code, which will be required for attendance verification and event entry.\n\n" .
 "We look forward to seeing you!\n\n" .
 "Regards,\nThe Event Committee
         ";
