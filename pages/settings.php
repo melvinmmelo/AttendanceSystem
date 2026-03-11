@@ -41,6 +41,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if ($a === 'change_password') {
+        $current_pass = $_POST['current_password'] ?? '';
+        $new_pass = $_POST['new_password'] ?? '';
+        $confirm_pass = $_POST['confirm_password'] ?? '';
+        $admin_id = $_SESSION['admin_id'];
+
+        if (empty($current_pass) || empty($new_pass) || empty($confirm_pass)) {
+            flash('error', 'All password fields are required.');
+        } elseif (strlen($new_pass) < 8) {
+            flash('error', 'New password must be at least 8 characters long.');
+        } elseif ($new_pass !== $confirm_pass) {
+            flash('error', 'New password and confirmation do not match.');
+        } else {
+            $admin = db_row("SELECT password FROM admins WHERE id = ?", [$admin_id]);
+
+            if (!$admin || !password_verify($current_pass, $admin['password'])) {
+                flash('error', 'Incorrect current password.');
+            } else {
+                // All checks passed, update the password
+                $new_pass_hashed = password_hash($new_pass, PASSWORD_DEFAULT);
+                db_execute("UPDATE admins SET password = ? WHERE id = ?", [$new_pass_hashed, $admin_id]);
+
+                flash('success', 'Your password has been updated successfully.');
+            }
+        }
+        header('Location: index.php?page=settings');
+        exit;
+    }
+
     if ($a === 'delete_database') {
         $db_name = DB_NAME;
         // This query is specific to MySQL/MariaDB.
@@ -91,6 +120,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Send Test Email</button>
         </form>
     </div>
+</div>
+
+<div class="card" style="max-width: 680px; margin-top: 20px;">
+    <div class="card-header">
+        <span><i class="bi bi-key"></i></span>
+        <div class="card-title">Change Password</div>
+    </div>
+    <form method="POST" action="index.php?page=settings">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="change_password">
+        <div class="card-body">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" name="current_password" class="form-input" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" name="new_password" class="form-input" required minlength="8">
+                    <div class="form-hint">Minimum 8 characters.</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm New Password</label>
+                    <input type="password" name="confirm_password" class="form-input" required>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer"><button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Update Password</button></div>
+    </form>
 </div>
 
 <div class="card" style="max-width: 680px; margin-top: 20px; border-color: var(--danger);">
