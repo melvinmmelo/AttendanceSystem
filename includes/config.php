@@ -467,16 +467,21 @@ function send_qr_code_email(array $attendee, array $event)
         $qr_image_string = $writer->write($qr_code)->getString();
 
         // 3. Create email body content
-        $event_name = $event['name'] ?? $event['event_name']; // Handle both possible keys from different call sites
+        // Normalize event data keys that might come from different sources for robustness.
+        $event_name = htmlspecialchars($event['name'] ?? $event['event_name'] ?? 'the event');
+        $event_venue = htmlspecialchars($event['venue'] ?? 'To be announced');
+        $event_date = $event['event_date'] ?? null;
+        $event_time = $event['event_time'] ?? null;
+
         $subject = "Your QR Code for " . $event_name;
 
         // Format date and time for display
         $event_datetime_str = '';
-        if (!empty($event['event_date'])) {
-            $date = new DateTime($event['event_date']);
+        if (!empty($event_date)) {
+            $date = new DateTime($event_date);
             $event_datetime_str = $date->format('F j, Y');
-            if (!empty($event['event_time'])) {
-                $time = new DateTime($event['event_time']);
+            if (!empty($event_time)) {
+                $time = new DateTime($event_time);
                 $event_datetime_str .= ' at ' . $time->format('g:i A');
             }
         }
@@ -488,7 +493,7 @@ function send_qr_code_email(array $attendee, array $event)
             <div style='padding: 15px; background-color: rgba(255,255,255,0.05); border-radius: 10px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1);'>
                 <h3 style='margin-top:0; margin-bottom: 12px; color: #ffc107;'>Event Details:</h3>
                 <p style='margin: 5px 0;'><strong>Date & Time:</strong> " . ($event_datetime_str ?: 'To be announced') . "</p>
-                <p style='margin: 5px 0;'><strong>Venue:</strong> " . (htmlspecialchars($event['venue'] ?? 'To be announced')) . "</p>
+                <p style='margin: 5px 0;'><strong>Venue:</strong> " . $event_venue . "</p>
                 <p style='margin: 5px 0;'><strong>QR Code ID:</strong> " . (htmlspecialchars($attendee['qr_code_id'] ?? 'N/A')) . "</p>
             </div>
             <p style='font-size: 16px; color: #f0f8ff; border-left: 3px solid #ffc107; padding-left: 15px; margin-top: 20px;'>
@@ -504,7 +509,7 @@ Hi " . $attendee['full_name'] . ",\n\n" .
 "We are pleased to inform you that your registration for the INNOVED 2026 has been officially approved. We are excited to have you join us.\n\n" .
 "Event Details:\n" .
 "Date & Time: " . ($event_datetime_str ?: 'To be announced') . "\n" .
-"Venue: " . ($event['venue'] ?? 'To be announced') . "\n" .
+"Venue: " . $event_venue . "\n" .
 "QR Code ID: " . ($attendee['qr_code_id'] ?? 'N/A') . "\n\n" .
 "Kindly keep this email, or download or take a screenshot of the attached QR code, which will be required for attendance verification and event entry.\n\n" .
 "We look forward to seeing you!\n\n" .
