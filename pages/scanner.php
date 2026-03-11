@@ -1,6 +1,18 @@
 <?php
 // pages/scanner.php
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
+    $a = $_REQUEST['action'] ?? '';
+    if ($a === 'clear_scan_log') {
+        // Using TRUNCATE is faster than DELETE for clearing the whole table.
+        db_execute("TRUNCATE TABLE scan_logs");
+        flash('success', 'Scan log has been cleared.');
+        header('Location: index.php?page=scanner');
+        exit;
+    }
+}
+
 $filter_event_id = (int)($_GET['event_id'] ?? 0);
 
 $events = db_query("SELECT id,name FROM events WHERE status='active' ORDER BY event_date ASC");
@@ -66,7 +78,14 @@ $recent_scans = db_query($recent_scans_sql, $recent_scans_params);
       <div class="card-header">
         <span><i class="bi bi-list-ul"></i></span>
         <div class="card-title">Scan Log</div>
-        <span class="badge badge-success"><span class="live-dot" style="margin-right:4px;"></span>Live</span>
+        <span class="badge badge-success" style="margin-left: auto; margin-right: 10px;"><span class="live-dot" style="margin-right:4px;"></span>Live</span>
+        <form method="POST" action="index.php?page=scanner" id="clear-log-form" style="margin: 0;">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="clear_scan_log">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="confirm('Clear Scan Log?', 'Are you sure you want to delete all scan log entries? This action cannot be undone.', () => { document.getElementById('clear-log-form').submit(); })">
+                <i class="bi bi-trash"></i> Clear
+            </button>
+        </form>
       </div>
       <div style="max-height:355px;overflow-y:auto;" id="scan-log">
         <?php if (empty($recent_scans)): ?>
@@ -222,6 +241,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // A scan is already in progress, ignore this one.
         }
         isProcessing = true; // Set the lock
+        // Pause the scanner to prevent it from reading another QR code while this one is being processed.
+        // This improves stability and reduces unnecessary CPU/camera usage.
+        if (html5QrCode.isScanning) {
+            html5QrCode.pause();
+        }
 
         // processScan is async, so we can use .finally()
         processScan(decodedText).finally(() => {
@@ -237,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.warn("Could not resume scanner, it might have been stopped already.", e);
                     }
                 }
-            }, 500); // Cooldown period (reduced from 1500ms for faster scanning)
+            }, 300); // Cooldown period further reduced for faster scanning
         });
     };
 

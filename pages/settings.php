@@ -40,6 +40,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: index.php?page=settings');
         exit;
     }
+
+    if ($a === 'delete_database') {
+        $db_name = DB_NAME;
+        // This query is specific to MySQL/MariaDB.
+        $tables_result = db_query("SELECT table_name FROM information_schema.tables WHERE table_schema = ?", [$db_name]);
+
+        if (!empty($tables_result)) {
+            db_execute("SET FOREIGN_KEY_CHECKS = 0;");
+            foreach ($tables_result as $table) {
+                // Table names from information_schema are considered safe, but we wrap in backticks as good practice.
+                db_execute("DROP TABLE IF EXISTS `".$table['table_name']."`");
+            }
+            db_execute("SET FOREIGN_KEY_CHECKS = 1;");
+        }
+
+        // Log the user out and redirect to login.
+        // A flash message is set which will be displayed on the login page.
+        flash('success', 'All database tables have been deleted. You will need to re-import the `database.sql` file to use the application again.');
+
+        // Replicate logout logic from logout.php to ensure a clean slate
+        unset($_SESSION['admin_id'], $_SESSION['admin_name'], $_SESSION['admin_role'], $_SESSION['last_activity']);
+        session_regenerate_id(true);
+
+        header('Location: index.php?page=login');
+        exit;
+    }
 }
 ?>
 <div class="page-hero"><h1>Settings</h1><p>Configure system settings and verify integrations.</p></div>
@@ -64,5 +90,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="hidden" name="action" value="send_test_email">
             <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Send Test Email</button>
         </form>
+    </div>
+</div>
+
+<div class="card" style="max-width: 680px; margin-top: 20px; border-color: var(--danger);">
+    <div class="card-header" style="background: rgba(255, 87, 87, 0.1);">
+        <span><i class="bi bi-exclamation-octagon"></i></span>
+        <div class="card-title">Danger Zone</div>
+    </div>
+    <div class="card-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h4 style="margin:0; font-size: 1rem; color: var(--text);">Delete All Data</h4>
+                <p class="text-muted text-sm" style="margin-top: 5px; max-width: 400px;">
+                    This will permanently delete all events, attendees, logs, and settings from the database.
+                    <br><strong>This action cannot be undone.</strong>
+                </p>
+            </div>
+            <form method="POST" action="index.php?page=settings" id="delete-db-form">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="delete_database">
+                <button type="button" class="btn btn-danger" onclick="confirm('Delete All Database Data?', 'Are you absolutely sure you want to delete all data? This will log you out and you will need to set up the application from scratch by re-importing the database schema.', () => { document.getElementById('delete-db-form').submit(); })">
+                    <i class="bi bi-trash"></i> Delete All Data
+                </button>
+            </form>
+        </div>
     </div>
 </div>
