@@ -82,14 +82,8 @@ $flash_info    = flash('info');
         Login to AttendQR
       </button>
     </form>
-
-    <div style="text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);font-size:.78rem;color:var(--text3);">
-      Default credentials: <code>admin@attendqr.com</code> / <code>password</code>
-    </div>
   </div>
 </div>
 <script src="assets/js/app.js"></script>
 </body>
 </html>
-<?php
-// pages/logout.php
