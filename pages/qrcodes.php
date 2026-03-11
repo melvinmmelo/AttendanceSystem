@@ -255,11 +255,18 @@ if (isset($_GET['prefill_id'])) {
               : '<span class="badge badge-neutral"><i class="bi bi-x-circle"></i> Pending</span>' ?>
           </td>
           <td>
-            <?= match($q['checkin_status']) {
-              'checked_in' => '<span class="badge badge-success"><i class="bi bi-check-circle"></i> Scanned</span>',
-              'pending'    => '<span class="badge badge-warning"><i class="bi bi-hourglass-split"></i> Pending</span>',
-              default      => '<span class="badge badge-neutral">—</span>'
-            } ?>
+            <?php
+            switch($q['checkin_status']) {
+              case 'checked_in':
+                echo '<span class="badge badge-success"><i class="bi bi-check-circle"></i> Scanned</span>';
+                break;
+              case 'pending':
+                echo '<span class="badge badge-warning"><i class="bi bi-hourglass-split"></i> Pending</span>';
+                break;
+              default:
+                echo '<span class="badge badge-neutral">—</span>';
+            }
+            ?>
           </td>
           <td>
             <button class="action-btn" title="Regenerate QR"
