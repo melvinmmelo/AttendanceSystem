@@ -439,7 +439,7 @@ HTML;
  * @param array $event The event's data (name).
  * @return bool|string True on success, or an error message string on failure.
  */
-function send_qr_code_email(array $attendee, array $event): bool|string
+function send_qr_code_email(array $attendee, array $event)
 {
     // Pre-flight check for Composer dependencies.
     if (!class_exists(\Endroid\QrCode\QrCode::class) || !class_exists(PHPMailer::class)) {
