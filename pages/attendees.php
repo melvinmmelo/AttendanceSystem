@@ -127,7 +127,7 @@ if (isset($_GET['export'])) {
           <tr><td colspan="9" class="text-center text-muted" style="padding:40px;">No attendees found.</td></tr>
         <?php else: ?>
           <?php foreach ($attendees as $a):
-            $initials = implode('',array_map(fn($w)=>strtoupper($w[0]),array_slice(explode(' ',$a['full_name']),0,2)));
+            $initials = implode('',array_map(function($w){return strtoupper($w[0]);},array_slice(explode(' ',$a['full_name']),0,2)));
           ?>
           <tr id="attendee-row-<?= $a['id'] ?>">
             <td>
@@ -144,11 +144,19 @@ if (isset($_GET['export'])) {
             <td><?= date('M j, g:i A', strtotime($a['registration_at'])) ?></td>
             <td><?= $a['checkin_at'] ? date('M j, g:i A', strtotime($a['checkin_at'])) : '—' ?></td>
             <td>
-              <?= match($a['checkin_status']) {
-                'checked_in' => '<span class="badge badge-success"><i class="bi bi-check-circle"></i> Checked In</span>',
-                'pending'    => '<span class="badge badge-warning"><i class="bi bi-hourglass-split"></i> Pending</span>',
-                'no_show'    => '<span class="badge badge-error"><i class="bi bi-x-circle"></i> No Show</span>'
-              } ?>
+              <?php
+              switch($a['checkin_status']) {
+                case 'checked_in':
+                  echo '<span class="badge badge-success"><i class="bi bi-check-circle"></i> Checked In</span>';
+                  break;
+                case 'pending':
+                  echo '<span class="badge badge-warning"><i class="bi bi-hourglass-split"></i> Pending</span>';
+                  break;
+                case 'no_show':
+                  echo '<span class="badge badge-error"><i class="bi bi-x-circle"></i> No Show</span>';
+                  break;
+              }
+              ?>
             </td>
             <td class="email-status-cell">
               <?= $a['email_sent']

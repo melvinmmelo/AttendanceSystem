@@ -85,7 +85,7 @@ try {
             send_json_response(['success' => false, 'message' => 'API endpoint not found.'], 404);
             break;
     }
-} catch (Throwable $e) {
+} catch (Exception $e) {
     // Catch any unexpected errors and return a generic server error.
     send_json_response(['success' => false, 'message' => 'An internal server error occurred: ' . $e->getMessage()], 500);
 }

@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (count($lines) < 1 || empty(trim($lines[0]))) throw new Exception("The CSV file is empty or invalid.");
 
             $raw_headers = str_getcsv(array_shift($lines));
-            $headers = array_map(fn($h) => strtolower(trim($h)), $raw_headers);
+            $headers = array_map(function($h) { return strtolower(trim($h)); }, $raw_headers);
 
             // --- Flexible Name and Email Parsing Keys ---
             // This list is now more comprehensive to automatically detect more column name variations.

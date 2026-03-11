@@ -4,9 +4,9 @@
 // ============================================================
 
 class Database {
-    private static ?PDO $instance = null;
+    private static $instance = null;
 
-    public static function getInstance(): PDO {
+    public static function getInstance() {
         if (self::$instance === null) {
             $dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT .
                    ';dbname=' . DB_NAME . ';charset=utf8mb4';
@@ -38,31 +38,31 @@ class Database {
 // ============================================================
 //  Helper: run a query and return results
 // ============================================================
-function db_query(string $sql, array $params = []): array {
+function db_query($sql, $params = []) {
     $stmt = Database::getInstance()->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();
 }
 
-function db_row(string $sql, array $params = []): ?array {
+function db_row($sql, $params = []) {
     $stmt = Database::getInstance()->prepare($sql);
     $stmt->execute($params);
     $row = $stmt->fetch();
     return $row ?: null;
 }
 
-function db_execute(string $sql, array $params = []): int {
+function db_execute($sql, $params = []) {
     $stmt = Database::getInstance()->prepare($sql);
     $stmt->execute($params);
     return $stmt->rowCount();
 }
 
-function db_count(string $sql, array $params = []): int {
+function db_count($sql, $params = []) {
     $stmt = Database::getInstance()->prepare($sql);
     $stmt->execute($params);
     return (int) $stmt->fetchColumn();
 }
 
-function db_last_insert_id(): int {
+function db_last_insert_id() {
     return (int) Database::getInstance()->lastInsertId();
 }

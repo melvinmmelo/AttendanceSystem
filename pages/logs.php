@@ -67,9 +67,20 @@ if (isset($_GET['export'])) {
             <td>
               <?php
               $result = $l['result'] ?? '';
-              $icon_class = match ($result) {
-                  'checked_in' => 'bi bi-check-circle-fill text-success', 'already_checked_in' => 'bi bi-exclamation-triangle-fill text-warning', 'invalid', 'fail' => 'bi bi-x-circle-fill text-error', default => 'bi bi-info-circle-fill text-info',
-              };
+              switch ($result) {
+                  case 'checked_in':
+                      $icon_class = 'bi bi-check-circle-fill text-success';
+                      break;
+                  case 'already_checked_in':
+                      $icon_class = 'bi bi-exclamation-triangle-fill text-warning';
+                      break;
+                  case 'invalid':
+                  case 'fail':
+                      $icon_class = 'bi bi-x-circle-fill text-error';
+                      break;
+                  default:
+                      $icon_class = 'bi bi-info-circle-fill text-info';
+              }
               echo "<i class=\"$icon_class\"></i> " . htmlspecialchars($result);
               ?>
             </td>

@@ -78,27 +78,54 @@ $recent_scans = db_query($recent_scans_sql, $recent_scans_params);
           <?php foreach ($recent_scans as $s): ?>
           <div class="scan-log-item">
             <span style="font-size:1.4rem;">
-              <?= match($s['scan_result']) {
-                'checked_in', 'manual_lookup_checked_in'
-                    => '<i class="bi bi-check-circle-fill text-success"></i>',
-                'already_checked_in', 'manual_lookup_duplicate'
-                    => '<i class="bi bi-exclamation-triangle-fill text-warning"></i>',
-                'wrong_event', 'manual_lookup_wrong_event'
-                    => '<i class="bi bi-exclamation-circle-fill text-error"></i>',
-                default // 'invalid', 'not_registered', 'manual_lookup_not_found', 'error'
-                    => '<i class="bi bi-x-circle-fill text-error"></i>'
-              } ?>
+              <?php
+              switch($s['scan_result']) {
+                case 'checked_in':
+                case 'manual_lookup_checked_in':
+                    echo '<i class="bi bi-check-circle-fill text-success"></i>';
+                    break;
+                case 'already_checked_in':
+                case 'manual_lookup_duplicate':
+                    echo '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
+                    break;
+                case 'wrong_event':
+                case 'manual_lookup_wrong_event':
+                    echo '<i class="bi bi-exclamation-circle-fill text-error"></i>';
+                    break;
+                default: // 'invalid', 'not_registered', 'manual_lookup_not_found', 'error'
+                    echo '<i class="bi bi-x-circle-fill text-error"></i>';
+              }
+              ?>
             </span>
             <div style="flex:1;">
               <div style="font-size:.85rem;font-weight:500;color:var(--text);"><?= htmlspecialchars($s['full_name']??'Unknown') ?></div>
               <div style="font-size:.73rem;color:var(--text3);"><?= htmlspecialchars($s['email'] ?? 'No Email') ?> &bull; <?= date('g:i A', strtotime($s['scanned_at'])) ?></div>
             </div>
-            <span class="badge <?= match($s['scan_result']){
-                'checked_in', 'manual_lookup_checked_in' => 'badge-success',
-                'already_checked_in', 'manual_lookup_duplicate' => 'badge-warning',
-                default => 'badge-error'
-            } ?>">
-              <?= match($s['scan_result']){'checked_in'=>'OK','manual_lookup_checked_in'=>'LOOKUP','already_checked_in'=>'DUP','manual_lookup_duplicate'=>'DUP','wrong_event'=>'WRONG','manual_lookup_wrong_event'=>'WRONG',default=>'FAIL'} ?>
+            <span class="badge <?php
+                switch($s['scan_result']){
+                    case 'checked_in':
+                    case 'manual_lookup_checked_in':
+                        echo 'badge-success';
+                        break;
+                    case 'already_checked_in':
+                    case 'manual_lookup_duplicate':
+                        echo 'badge-warning';
+                        break;
+                    default:
+                        echo 'badge-error';
+                }
+            ?>">
+              <?php
+                switch($s['scan_result']){
+                    case 'checked_in': echo 'OK'; break;
+                    case 'manual_lookup_checked_in': echo 'LOOKUP'; break;
+                    case 'already_checked_in':
+                    case 'manual_lookup_duplicate': echo 'DUP'; break;
+                    case 'wrong_event':
+                    case 'manual_lookup_wrong_event': echo 'WRONG'; break;
+                    default: echo 'FAIL';
+                }
+              ?>
             </span>
           </div>
           <?php endforeach; ?>

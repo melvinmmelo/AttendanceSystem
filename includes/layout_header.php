@@ -10,7 +10,7 @@ header("Pragma: no-cache");
 $current_page = $_GET['page'] ?? 'dashboard';
 $admin_name   = $_SESSION['admin_name']  ?? 'Admin';
 $admin_role   = $_SESSION['admin_role']  ?? 'admin';
-$admin_initials = implode('', array_map(fn($w) => strtoupper($w[0]), array_slice(explode(' ', $admin_name), 0, 2)));
+$admin_initials = implode('', array_map(function($w) { return strtoupper($w[0]); }, array_slice(explode(' ', $admin_name), 0, 2)));
 
 $page_titles = [
     'dashboard'  => 'Dashboard',

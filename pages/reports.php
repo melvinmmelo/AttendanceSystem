@@ -35,8 +35,8 @@ $duplicate_scans = db_query("
 
 // JS chart data
 $chart_labels = json_encode(array_column($event_stats,'name'));
-$chart_regs   = json_encode(array_map(fn($e)=>(int)$e['registrations'],$event_stats));
-$chart_checks = json_encode(array_map(fn($e)=>(int)$e['checked_in'],$event_stats));
+$chart_regs   = json_encode(array_map(function($e){ return (int)$e['registrations']; },$event_stats));
+$chart_checks = json_encode(array_map(function($e){ return (int)$e['checked_in']; },$event_stats));
 ?>
 <div class="page-hero"><h1>Analytics &amp; Reports</h1><p>Detailed insights across all events.</p></div>
 

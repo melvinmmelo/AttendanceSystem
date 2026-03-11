@@ -145,7 +145,7 @@ $recent = db_query("SELECT a.*, e.name as event_name FROM attendees a
           <tr><td colspan="5" class="text-center text-muted" style="padding:32px;">No check-ins yet.</td></tr>
         <?php else: ?>
           <?php foreach ($recent as $a):
-            $initials = implode('', array_map(fn($w)=>strtoupper($w[0]), array_slice(explode(' ',$a['full_name']),0,2)));
+            $initials = implode('', array_map(function($w){return strtoupper($w[0]);}, array_slice(explode(' ',$a['full_name']),0,2)));
           ?>
           <tr>
             <td data-label="Attendee">

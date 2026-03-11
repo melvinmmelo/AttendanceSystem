@@ -69,14 +69,13 @@ date_default_timezone_set('Asia/Manila');
 // Email errors are now logged to the `email_logs` database table.
 
 // Secure session cookie settings
-session_set_cookie_params([
-    'lifetime' => SESSION_TIMEOUT,
-    'path' => '/',
-    'domain' => '', // Leave empty for current domain
-    'secure' => isset($_SERVER['HTTPS']), // Send only over HTTPS
-    'httponly' => true, // Prevent JS access
-    'samesite' => 'Lax' // CSRF protection
-]);
+session_set_cookie_params(
+    SESSION_TIMEOUT,
+    '/',
+    '', // domain
+    isset($_SERVER['HTTPS']), // secure
+    true // httponly
+);
 
 session_start();
 
@@ -120,7 +119,7 @@ function requireLogin() {
  * @param array $data The data to encode as JSON.
  * @param int $http_code The HTTP status code to send.
  */
-function send_json_response(array $data, int $http_code = 200) {
+function send_json_response(array $data, $http_code = 200) {
     // Clear any previously buffered output (like PHP notices)
     if (ob_get_level()) {
         ob_end_clean();
@@ -192,7 +191,7 @@ function flash($key, $msg = null) {
  * @param bool $full If true, returns all time units.
  * @return string The formatted time string, e.g., "5 minutes ago".
  */
-function time_elapsed_string($datetime, $full = false): string {
+function time_elapsed_string($datetime, $full = false) {
     try {
         $now = new DateTime;
         $ago = new DateTime($datetime);
@@ -353,7 +352,7 @@ function send_email($to, $subject, $body, $alt_body = '', $attachment = null) {
  * @param string $base_url The base URL for page links (without the '&p=' part).
  * @return string The generated HTML for the pagination control.
  */
-function render_pagination(int $current_page, int $total_pages, string $base_url): string {
+function render_pagination($current_page, $total_pages, $base_url) {
     if ($total_pages <= 1) {
         return '';
     }
@@ -393,7 +392,7 @@ function render_pagination(int $current_page, int $total_pages, string $base_url
  * @param string $title The title of the email.
  * @return string The full HTML email document.
  */
-function create_email_template(string $content, string $title = 'InnovEd 2026'): string {
+function create_email_template($content, $title = 'InnovEd 2026') {
     $year = date('Y');
     // Using heredoc for readability. Inline styles are required for email client compatibility.
     return <<<HTML
@@ -523,7 +522,7 @@ Hi " . $attendee['full_name'] . ",\n\n" .
             'name'   => 'qr.png'
         ]);
 
-    } catch (Throwable $e) {
+    } catch (Exception $e) {
         $error_message = "QR Email Error: " . $e->getMessage();
         return $error_message;
     }

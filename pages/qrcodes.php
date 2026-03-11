@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "Bulk send complete. Sent: $success_count. Failed: $fail_count.";
             if ($fail_count > 0) $message .= " Check email_errors.log for details.";
             send_json_response(['success' => true, 'message' => $message]);
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             send_json_response(['success' => false, 'message' => 'A server error occurred: ' . $e->getMessage()], 500);
         }
     }
@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 send_json_response(['success' => false, 'message' => $error_message]);
             }
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             // Catch any unexpected errors (like PDOExceptions) and return a proper JSON response.
             send_json_response(['success' => false, 'message' => 'A server error occurred: ' . $e->getMessage()], 500);
         }

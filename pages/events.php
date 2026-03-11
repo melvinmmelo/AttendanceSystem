@@ -267,13 +267,13 @@ if ($action === 'create'): ?>
         <?php else: ?>
           <?php foreach ($events as $ev):
             $rate = $ev['total_reg'] > 0 ? round($ev['total_checkin']/$ev['total_reg']*100) : 0;
-            $status_badge = match($ev['status']) {
-              'active'    => 'badge-success',
-              'inactive'  => 'badge-neutral',
-              'upcoming'  => 'badge-info',
-              'completed' => 'badge-warning',
-              default     => 'badge-neutral'
-            };
+            switch($ev['status']) {
+              case 'active':    $status_badge = 'badge-success'; break;
+              case 'inactive':  $status_badge = 'badge-neutral'; break;
+              case 'upcoming':  $status_badge = 'badge-info';    break;
+              case 'completed': $status_badge = 'badge-warning'; break;
+              default:          $status_badge = 'badge-neutral';
+            }
           ?>
           <tr>
             <td data-label="Event">
