@@ -1,0 +1,52 @@
+name: Deploy to IQAO VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build & deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy
+        env:
+          SSH: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+        run: |
+          $SSH 'set -e; cd /docker/attendqr/repo && git fetch --depth=1 origin main && git reset --hard origin/main && cd /docker/attendqr && docker compose up -d --build'
+
+      - name: Healthcheck
+        env:
+          SSH: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+        run: |
+          for i in 1 2 3 4 5; do
+            STATUS=$($SSH "docker inspect -f '{{.State.Health.Status}}' attendqr-app" 2>/dev/null || echo "missing")
+            echo "Attempt $i: $STATUS"
+            if [ "$STATUS" = "healthy" ]; then
+              echo "Deploy successful"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Container not healthy after deploy"
+          $SSH "docker logs --tail 80 attendqr-app"
+          exit 1
+
+      - name: External smoke test
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 https://attendqr.ub.edu.ph/)
+          echo "https://attendqr.ub.edu.ph/ -> $STATUS"
+          [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]
