@@ -45,8 +45,11 @@ jobs:
           $SSH "docker logs --tail 80 attendqr-app"
           exit 1
 
-      - name: External smoke test
+      - name: Smoke test (via VPS, bypasses CF WAF runner IPs)
+        env:
+          SSH: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
         run: |
-          STATUS=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 https://attendqr.ub.edu.ph/)
-          echo "https://attendqr.ub.edu.ph/ -> $STATUS"
+          # Hit Apache directly on the host via origin cert, bypassing CF edge.
+          STATUS=$($SSH "curl -sk -o /dev/null -w '%{http_code}' --max-time 10 --resolve attendqr.ub.edu.ph:443:127.0.0.1 https://attendqr.ub.edu.ph/")
+          echo "Apache vhost on VPS -> $STATUS"
           [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]
