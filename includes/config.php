@@ -56,8 +56,8 @@ define('QR_MARGIN', 10);
 define('EMAIL_DEBUG_MODE', false); // Set to true to display emails on screen instead of sending.
 
 // ---- Webhook secret (Google Forms integration) ----
-// This should be a long, random, and unpredictable string to secure your webhook endpoint.
-define('WEBHOOK_SECRET', 'whsec_9aKjLpWn3RzXvYtSgVbQfGjHnMbQeThWmYq3t6w9z$C&F)J@NcRf');
+// Loaded from the .env file (never commit the .env to the repo).
+define('WEBHOOK_SECRET', $_ENV['WEBHOOK_SECRET'] ?? '');
 
 // ---- Session timeout (seconds) ----
 define('SESSION_TIMEOUT', 3600);
